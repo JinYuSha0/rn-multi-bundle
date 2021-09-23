@@ -2,12 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const Server = require('metro/src/Server');
 const output = require('metro/src/shared/output/bundle');
-const loadConfig =
-  require('@react-native-community/cli/build/tools/config/index').default;
-const loadMetroConfig =
-  require('@react-native-community/cli/build/tools/loadMetroConfig').default;
-const saveAssets =
-  require('@react-native-community/cli/build/commands/bundle/saveAssets').default;
+const loadConfig = require('@react-native-community/cli/build/tools/config/index')
+  .default;
+const loadMetroConfig = require('@react-native-community/cli/build/tools/loadMetroConfig')
+  .default;
+const saveAssets = require('@react-native-community/cli/build/commands/bundle/saveAssets')
+  .default;
 const genFileHash = require('../utils/genFileHash');
 const genPathFactory = require('../utils/genPathFactory');
 const getModuleId = require('../utils/getModuleId')(false, 0);
@@ -35,21 +35,25 @@ function common(config) {
   const outputBundleFileName = `common.${platform}.bundle`;
   const bundleOutputFilePath = path.resolve(
     createDirIfNotExists(bundleOutputPath),
-    outputBundleFileName,
+    outputBundleFileName
   );
   const [p, resolve] = deffered();
-  const whiteList = bundleSplitConfig.whiteList.map(i =>
-    path.join(process.cwd(), i),
+  const whiteList = bundleSplitConfig.whiteList.map((i) =>
+    path.join(process.cwd(), i)
   );
-  const detectFilter = path => {
+  const detectFilter = (path) => {
     let filter = false;
+    // 过滤自带的require polyfills实现不重启app更新模块
     if (path.includes(nodeModulePath)) {
+      if (path.indexOf('metro-runtime/src/polyfills/require.js') > -1) {
+        return false;
+      }
       // 外部依赖
       return true;
     } else {
       if (bundleSplitConfig.blackList.includes(path)) return false;
       try {
-        whiteList.forEach(item => {
+        whiteList.forEach((item) => {
           if (path.startsWith(item)) {
             filter = true;
             throw new Error();
@@ -59,8 +63,15 @@ function common(config) {
     }
     return filter;
   };
-  const bundle = async platform => {
+  const bundle = async (platform) => {
     const config = await loadMetroConfig(ctx);
+    const originGetPolyfills = config.serializer.getPolyfills;
+    config.serializer.getPolyfills = function () {
+      return [
+        path.join(__dirname, '../polyfills/require.js'),
+        ...originGetPolyfills(),
+      ];
+    };
     config.serializer.processModuleFilter = function (module) {
       const { path } = module;
       return detectFilter(path);
@@ -96,7 +107,7 @@ function common(config) {
           bundleOutput: bundleOutputFilePath,
           encoding: 'utf-8',
         },
-        console.log,
+        console.log
       );
       const outputAssets = await server.getAssets({
         ...Server.DEFAULT_BUNDLE_OPTIONS,
@@ -106,12 +117,12 @@ function common(config) {
       await saveAssets(
         outputAssets,
         platform,
-        createDirIfNotExists(assetsOutPuthPath),
+        createDirIfNotExists(assetsOutPuthPath)
       );
       fs.writeFileSync(
         path.resolve(
           createDirIfNotExists(sourceMapPath),
-          `moduleIdMap-${+new Date()}.json`,
+          `moduleIdMap-${+new Date()}.json`
         ),
         JSON.stringify(
           Object.assign({
@@ -122,8 +133,8 @@ function common(config) {
             ...moduleIdMap,
           }),
           null,
-          2,
-        ),
+          2
+        )
       );
     } finally {
       server.end();
@@ -137,19 +148,19 @@ function common(config) {
     resolve(true);
   }
 
-  p.then(isBuz => {
+  p.then((isBuz) => {
     const pAll = [];
     let startId = Object.keys(moduleIdMap).length;
     if (isBuz) {
       startId = Object.keys(require(getNewestSourceMap())).length;
     }
     delDir(codeDirPath);
-    analysisRegisterComponent().then(res => {
+    analysisRegisterComponent().then((res) => {
       for (let i = 0; i < Array.from(res.keys()).length; i++) {
         const component = Array.from(res.keys())[i];
         const entryFilePath = path.resolve(
           createDirIfNotExists(codeDirPath),
-          `${component}.${Math.random().toString(36).split('.')[1]}.js`,
+          `${component}.${Math.random().toString(36).split('.')[1]}.js`
         );
         fs.writeFileSync(entryFilePath, res.get(component));
         pAll.push(
@@ -159,18 +170,18 @@ function common(config) {
             entryFilePath,
             startId + i * 100000,
             config
-          ),
+          )
         );
       }
       Promise.all(pAll)
-        .then(childComponents => {
+        .then((childComponents) => {
           if (!isBuz) {
             const components = {
               [outputBundleFileName]: {
                 hash: genFileHash(bundleOutputFilePath),
               },
             };
-            childComponents.forEach(componentHash => {
+            childComponents.forEach((componentHash) => {
               Object.assign(components, componentHash);
             });
             fs.writeFileSync(
@@ -178,8 +189,8 @@ function common(config) {
               JSON.stringify(
                 { components, timestamp: +new Date() },
                 undefined,
-                2,
-              ),
+                2
+              )
             );
           }
         })
@@ -191,4 +202,4 @@ function common(config) {
   });
 }
 
-module.exports = common
+module.exports = common;
