@@ -3,12 +3,12 @@ const path = require('path');
 const compressing = require('compressing');
 const Server = require('metro/src/Server');
 const output = require('metro/src/shared/output/bundle');
-const loadConfig =
-  require('@react-native-community/cli/build/tools/config/index').default;
-const loadMetroConfig =
-  require('@react-native-community/cli/build/tools/loadMetroConfig').default;
-const saveAssets =
-  require('@react-native-community/cli/build/commands/bundle/saveAssets').default;
+const loadConfig = require('@react-native-community/cli/build/tools/config/index')
+  .default;
+const loadMetroConfig = require('@react-native-community/cli/build/tools/loadMetroConfig')
+  .default;
+const saveAssets = require('@react-native-community/cli/build/commands/bundle/saveAssets')
+  .default;
 const { createDirIfNotExists, delDir } = require('../utils/fsUtils');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathFactory = require('../utils/genPathFactory');
@@ -24,7 +24,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
     ? path.join(config.out, `./${component}`)
     : config.out;
   const assetsPath = config.buz
-    ? path.join(config.assetsOut, `./${component}/assets`)
+    ? path.join(config.assetsOut, `./${component}`)
     : config.assetsOut;
   if (config.buz) {
     delDir(bundlePath);
@@ -33,17 +33,17 @@ const bunele = async (platform, component, entryFile, startId, config) => {
   const bundleOutputPath = createDirIfNotExists(bundlePath);
   const assetsOutPuthPath = createDirIfNotExists(assetsPath);
   const fileName = `${String(component).toLocaleLowerCase()}.buz.${String(
-    platform,
+    platform
   ).toLocaleLowerCase()}.bundle`;
   const bundleOutputFilePath = path.resolve(
     createDirIfNotExists(bundleOutputPath),
-    fileName,
+    fileName
   );
   const metroConfig = await loadMetroConfig(ctx);
   const moduleIdMap = require(getNewestSourceMap());
   const commonHash = Object.keys(moduleIdMap)
-    .map(key => moduleIdMap[key])
-    .find(o => o.id === -1).hash;
+    .map((key) => moduleIdMap[key])
+    .find((o) => o.id === -1).hash;
   metroConfig.serializer.processModuleFilter = function (module) {
     const { path } = module;
     if (
@@ -61,7 +61,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
     return true;
   };
   metroConfig.serializer.createModuleIdFactory = function () {
-    return path => {
+    return (path) => {
       path = genPath(path);
       const commonModule = moduleIdMap[path];
       if (commonModule) {
@@ -86,7 +86,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
         bundleOutput: bundleOutputFilePath,
         encoding: 'utf-8',
       },
-      console.log,
+      console.log
     );
     const outputAssets = await server.getAssets({
       ...Server.DEFAULT_BUNDLE_OPTIONS,
@@ -96,7 +96,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
     await saveAssets(
       outputAssets,
       platform,
-      createDirIfNotExists(assetsOutPuthPath),
+      createDirIfNotExists(assetsOutPuthPath)
     );
     const hash = genFileHash(bundleOutputFilePath);
     if (config.buz) {
@@ -111,8 +111,8 @@ const bunele = async (platform, component, entryFile, startId, config) => {
             timestamp: +new Date(),
           },
           undefined,
-          2,
-        ),
+          2
+        )
       );
       await compressing.zip.compressDir(
         bundleOutputPath,
@@ -120,7 +120,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
         {
           relativePath: hash,
           ignoreBase: true,
-        },
+        }
       );
     }
     return {
