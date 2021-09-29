@@ -4,7 +4,7 @@ const fs = require('fs')
 const common = require('./scripts/common.js')
 
 const program = new Command();
-program.version('0.0.1');
+program.version('0.0.7');
 
 function parseFilepath(value, prev) {
 	if (!!value && fs.lstatSync(path.join(process.cwd(), value)).isFile()) {
@@ -42,7 +42,7 @@ if (!options.out && !options.buz) {
 	if (options.platform === 'android') {
 		options.out = path.resolve(process.cwd(), `./android/app/src/main/assets/`);
 	} else if (options.platform === 'ios') {
-		throw new Error('Set output folder path please.')
+		options.out = path.resolve(process.cwd(), `./ios/bundle/`);
 	}
 }
 
@@ -54,7 +54,7 @@ if (!options.assetsOut && !options.buz) {
 	if (options.platform === 'android') {
 		options.assetsOut = path.resolve(process.cwd(), `./android/app/src/main/res/`);
 	} else if (options.platform === 'ios') {
-		throw new Error('Set assets folder output path please.')
+		options.assetsOut = path.resolve(process.cwd(), `./ios/bundle/`);
 	}
 }
 
@@ -63,5 +63,3 @@ if (!options.assetsOut && options.buz) {
 }
 
 common(options)
-
-
