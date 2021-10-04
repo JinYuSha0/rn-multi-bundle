@@ -2,12 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const Server = require('metro/src/Server');
 const output = require('metro/src/shared/output/bundle');
-const loadConfig = require('@react-native-community/cli/build/tools/config/index')
-  .default;
-const loadMetroConfig = require('@react-native-community/cli/build/tools/loadMetroConfig')
-  .default;
-const saveAssets = require('@react-native-community/cli/build/commands/bundle/saveAssets')
-  .default;
+const loadConfig =
+  require('@react-native-community/cli/build/tools/config/index').default;
+const loadMetroConfig =
+  require('@react-native-community/cli/build/tools/loadMetroConfig').default;
+const saveAssets =
+  require('@react-native-community/cli/build/commands/bundle/saveAssets').default;
 const genFileHash = require('../utils/genFileHash');
 const genPathFactory = require('../utils/genPathFactory');
 const getModuleId = require('../utils/getModuleId')(false, 0);
@@ -23,10 +23,6 @@ function common(config) {
   const genPath = genPathFactory(rootPath);
   const bundleSplitConfig = require(config.config);
 
-  const sourceMapPath = path.join(config.sourceOut, './sourceMap');
-  const nodeModulePath = path.join(process.cwd(), 'node_modules');
-  const codeDirPath = path.join(config.sourceOut, './temp');
-
   let moduleIdMap = Object.create(null);
   const platform = config['platform'] || 'android';
   const entryFile = config.entry;
@@ -37,6 +33,9 @@ function common(config) {
     createDirIfNotExists(bundleOutputPath),
     outputBundleFileName
   );
+  const sourceMapPath = path.join(config.sourceOut, './sourceMap', platform);
+  const nodeModulePath = path.join(process.cwd(), 'node_modules');
+  const codeDirPath = path.join(config.sourceOut, './temp');
   const [p, resolve] = deffered();
   const whiteList = bundleSplitConfig.whiteList.map((i) =>
     path.join(process.cwd(), i)

@@ -3,12 +3,12 @@ const path = require('path');
 const compressing = require('compressing');
 const Server = require('metro/src/Server');
 const output = require('metro/src/shared/output/bundle');
-const loadConfig = require('@react-native-community/cli/build/tools/config/index')
-  .default;
-const loadMetroConfig = require('@react-native-community/cli/build/tools/loadMetroConfig')
-  .default;
-const saveAssets = require('@react-native-community/cli/build/commands/bundle/saveAssets')
-  .default;
+const loadConfig =
+  require('@react-native-community/cli/build/tools/config/index').default;
+const loadMetroConfig =
+  require('@react-native-community/cli/build/tools/loadMetroConfig').default;
+const saveAssets =
+  require('@react-native-community/cli/build/commands/bundle/saveAssets').default;
 const { createDirIfNotExists, delDir } = require('../utils/fsUtils');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathFactory = require('../utils/genPathFactory');
@@ -40,7 +40,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
     fileName
   );
   const metroConfig = await loadMetroConfig(ctx);
-  const moduleIdMap = require(getNewestSourceMap());
+  const moduleIdMap = require(getNewestSourceMap(platform));
   const commonHash = Object.keys(moduleIdMap)
     .map((key) => moduleIdMap[key])
     .find((o) => o.id === -1).hash;

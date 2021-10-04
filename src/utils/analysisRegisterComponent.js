@@ -81,21 +81,21 @@ function analysisRegisterComponent() {
                 [
                   types.importSpecifier(
                     types.identifier('AppRegistry'),
-                    types.identifier('AppRegistry'),
+                    types.identifier('AppRegistry')
                   ),
                 ],
-                'react-native',
-              ),
+                'react-native'
+              )
             );
             ast.body.push(
               genBuildImportDeclaration(
                 types,
                 specifiers,
-                path.resolve(rootPath, source),
-              ),
+                path.resolve(rootPath, source)
+              )
             );
             const register = [];
-            Array.from(this.component.get(component)).forEach(node => {
+            Array.from(this.component.get(component)).forEach((node) => {
               let name, importNode;
               if (types.isMemberExpression(node)) {
                 name = node.object.name;
@@ -111,7 +111,7 @@ function analysisRegisterComponent() {
 
               importNode.source.value = path.resolve(
                 rootPath,
-                importNode.source.value,
+                importNode.source.value
               );
               ast.body.push(importNode);
 
@@ -121,17 +121,17 @@ function analysisRegisterComponent() {
                     types.identifier('AppRegistry'),
                     types.identifier('registerComponent'),
                     false,
-                    false,
+                    false
                   ),
                   [
                     node,
                     types.arrowFunctionExpression(
                       [],
                       types.identifier(component),
-                      false,
+                      false
                     ),
-                  ],
-                ),
+                  ]
+                )
               );
             });
 

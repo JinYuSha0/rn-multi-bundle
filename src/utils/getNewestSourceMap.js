@@ -5,8 +5,12 @@ const fs = require('fs');
  * 获取最新的sourceMap文件
  * @returns
  */
-module.exports = function () {
-  const sourceMapDirPath = path.resolve(process.cwd(), './multiBundle/sourceMap');
+module.exports = function (platform) {
+  const sourceMapDirPath = path.resolve(
+    process.cwd(),
+    './multiBundle/sourceMap',
+    platform
+  );
   let result = null,
     ctimeMax = 0;
   if (fs.existsSync(sourceMapDirPath)) {

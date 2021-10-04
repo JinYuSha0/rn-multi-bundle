@@ -8,7 +8,7 @@ module.exports = function (isBussines, startId = 0) {
   let id = startId;
   const commonModuleMap = new Map();
   const bussinesModuleMap = new Map();
-  return path => {
+  return (path) => {
     const targetMap = !isBussines ? commonModuleMap : bussinesModuleMap;
     if (targetMap.has(path)) {
       return targetMap.get(path);
