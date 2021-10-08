@@ -151,7 +151,7 @@ function common(config) {
     const pAll = [];
     let startId = Object.keys(moduleIdMap).length;
     if (isBuz) {
-      startId = Object.keys(require(getNewestSourceMap())).length;
+      startId = Object.keys(require(getNewestSourceMap(platform))).length;
     }
     delDir(codeDirPath);
     analysisRegisterComponent().then((res) => {
