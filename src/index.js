@@ -2,9 +2,10 @@ const { Command } = require('commander');
 const path = require('path');
 const fs = require('fs');
 const common = require('./scripts/common.js');
+const package = require('../package.json');
 
 const program = new Command();
-program.version('0.1.4');
+program.version(package.version);
 
 function parseFilepath(value, prev) {
   if (!!value && fs.lstatSync(path.join(process.cwd(), value)).isFile()) {
