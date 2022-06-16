@@ -4,7 +4,7 @@ const fs = require('fs');
 const common = require('./scripts/common.js');
 
 const program = new Command();
-program.version('0.1.3');
+program.version('0.1.4');
 
 function parseFilepath(value, prev) {
   if (!!value && fs.lstatSync(path.join(process.cwd(), value)).isFile()) {
