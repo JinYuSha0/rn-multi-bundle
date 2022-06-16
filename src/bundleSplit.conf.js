@@ -1,4 +1,5 @@
 module.exports = {
+  useGestureHandler: true,
   whiteList: Array.from(
     new Set([
       'index.js',

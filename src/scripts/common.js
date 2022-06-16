@@ -162,7 +162,7 @@ function common(config) {
       startId = Object.keys(require(getNewestSourceMap(platform))).length;
     }
     delDir(codeDirPath);
-    analysisRegisterComponent().then((res) => {
+    analysisRegisterComponent(bundleSplitConfig).then((res) => {
       for (let i = 0; i < Array.from(res.keys()).length; i++) {
         const component = Array.from(res.keys())[i];
         const entryFilePath = path.resolve(

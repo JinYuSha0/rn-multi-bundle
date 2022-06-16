@@ -10,10 +10,19 @@ function genBuildImportDeclaration(t, specifiers, source) {
   return t.importDeclaration(specifiers, t.stringLiteral(`${source}`));
 }
 
+function useGestureHandlerExpression(use, node) {
+  if (use) {
+    return types.callExpression(types.identifier('gestureHandlerRootHOC'), [
+      node,
+    ]);
+  }
+  return node;
+}
+
 /**
  * 分析rn注册的模块
  */
-function analysisRegisterComponent() {
+function analysisRegisterComponent(config) {
   const indexPath = path.resolve(process.cwd(), 'index.js');
   const rootPath = process.cwd();
   const code = fs.readFileSync(indexPath);
@@ -94,6 +103,20 @@ function analysisRegisterComponent() {
                 path.resolve(rootPath, source)
               )
             );
+            if (!!config.useGestureHandler) {
+              ast.body.push(
+                genBuildImportDeclaration(
+                  types,
+                  [
+                    types.importSpecifier(
+                      types.identifier('gestureHandlerRootHOC'),
+                      types.identifier('gestureHandlerRootHOC')
+                    ),
+                  ],
+                  'react-native-gesture-handler'
+                )
+              );
+            }
             const register = [];
             Array.from(this.component.get(component)).forEach((node) => {
               let name, importNode;
@@ -127,7 +150,10 @@ function analysisRegisterComponent() {
                     node,
                     types.arrowFunctionExpression(
                       [],
-                      types.identifier(component),
+                      useGestureHandlerExpression(
+                        !!config.useGestureHandler,
+                        types.identifier(component)
+                      ),
                       false
                     ),
                   ]
@@ -147,7 +173,5 @@ function analysisRegisterComponent() {
   });
   return p;
 }
-
-analysisRegisterComponent();
 
 module.exports = analysisRegisterComponent;
