@@ -16,6 +16,7 @@ const { delDir, createDirIfNotExists } = require('../utils/fsUtils');
 const analysisRegisterComponent = require('../utils/analysisRegisterComponent');
 const bundleBuz = require('./bussines');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
+const genPathMacthRegExp = require('../utils/genPathMacthRegExp');
 
 function common(config) {
   const ctx = loadConfig();
@@ -37,30 +38,27 @@ function common(config) {
   const nodeModulePath = path.join(process.cwd(), 'node_modules');
   const codeDirPath = path.join(config.sourceOut, './temp');
   const [p, resolve] = deffered();
-  const whiteList = bundleSplitConfig.whiteList.map((i) =>
-    path.join(process.cwd(), i)
+  const whiteListRegExp = genPathMacthRegExp(
+    bundleSplitConfig.whiteList.map((i) => path.join(process.cwd(), i))
+  );
+  const blackListRegExp = genPathMacthRegExp(
+    bundleSplitConfig.blackList.map((i) => path.join(process.cwd(), i))
   );
   const detectFilter = (path) => {
-    let filter = false;
-    // 过滤自带的require polyfills实现不重启app更新模块
-    if (path.includes(nodeModulePath)) {
-      if (path.indexOf('metro-runtime/src/polyfills/require.js') > -1) {
-        return false;
+    try {
+      // 过滤自带的require polyfills实现不重启app更新模块
+      if (path.includes(nodeModulePath)) {
+        if (path.indexOf('metro-runtime/src/polyfills/require.js') > -1) {
+          return false;
+        }
+        // 外部依赖
+        return true;
+      } else {
+        if (blackListRegExp.test(path)) return false;
+        if (whiteListRegExp.test(path)) return true;
       }
-      // 外部依赖
-      return true;
-    } else {
-      if (bundleSplitConfig.blackList.includes(path)) return false;
-      try {
-        whiteList.forEach((item) => {
-          if (path.startsWith(item)) {
-            filter = true;
-            throw new Error();
-          }
-        });
-      } catch (e) {}
-    }
-    return filter;
+    } catch {}
+    return false;
   };
   const bundle = async (platform) => {
     const config = await loadMetroConfig(ctx);
