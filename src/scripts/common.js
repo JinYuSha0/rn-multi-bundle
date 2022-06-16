@@ -44,6 +44,10 @@ function common(config) {
   const blackListRegExp = genPathMacthRegExp(
     bundleSplitConfig.blackList.map((i) => path.join(process.cwd(), i))
   );
+  const bootstrapList = bundleSplitConfig.bootstrap.map((i) =>
+    path.join(process.cwd(), i)
+  );
+  const bootstrapIdSet = new Set();
   const detectFilter = (path) => {
     try {
       // 过滤自带的require polyfills实现不重启app更新模块
@@ -55,7 +59,8 @@ function common(config) {
         return true;
       } else {
         if (blackListRegExp.test(path)) return false;
-        if (whiteListRegExp.test(path)) return true;
+        if (whiteListRegExp.test(path) || bootstrapList.includes(path))
+          return true;
       }
     } catch {}
     return false;
@@ -81,6 +86,7 @@ function common(config) {
             id,
             hash: genFileHash(path),
           };
+          if (bootstrapList.includes(path)) bootstrapIdSet.add(id);
           return id;
         }
         return null;
@@ -98,6 +104,10 @@ function common(config) {
       bundle.code =
         `var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{},__METRO_GLOBAL_PREFIX__='';process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";\r` +
         bundle.code;
+      const bootstrapCode = Array.from(bootstrapIdSet).map(
+        (id) => `__r(${id});\n`
+      );
+      bundle.code = bundle.code + '\n' + bootstrapCode;
       output.save(
         bundle,
         {
