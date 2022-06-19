@@ -44,8 +44,8 @@ function common(config) {
   const blackListRegExp = genPathMacthRegExp(
     bundleSplitConfig.blackList.map((i) => path.join(process.cwd(), i))
   );
-  const bootstrapList = bundleSplitConfig.bootstrap.map((i) =>
-    path.join(process.cwd(), i)
+  const bootstrapListRegExp = genPathMacthRegExp(
+    bundleSplitConfig.bootstrap.map((i) => path.join(process.cwd(), i))
   );
   const bootstrapIdSet = new Set();
   const detectFilter = (path) => {
@@ -59,7 +59,7 @@ function common(config) {
         return true;
       } else {
         if (blackListRegExp.test(path)) return false;
-        if (whiteListRegExp.test(path) || bootstrapList.includes(path))
+        if (whiteListRegExp.test(path) || bootstrapListRegExp.test(path))
           return true;
       }
     } catch {}
@@ -86,7 +86,7 @@ function common(config) {
             id,
             hash: genFileHash(path),
           };
-          if (bootstrapList.includes(path)) bootstrapIdSet.add(id);
+          if (bootstrapListRegExp.test(path)) bootstrapIdSet.add(id);
           return id;
         }
         return null;
