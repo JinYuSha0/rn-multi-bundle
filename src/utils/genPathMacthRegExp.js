@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const sep = path.sep;
 
 module.exports = function genPathMacthRegExp(pathList) {
