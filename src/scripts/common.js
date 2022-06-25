@@ -183,6 +183,7 @@ function common(config) {
             const components = {
               [outputBundleFileName]: {
                 hash: genFileHash(bundleOutputFilePath),
+                componentType: 0,
               },
             };
             childComponents.forEach((componentHash) => {

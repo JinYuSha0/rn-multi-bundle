@@ -121,7 +121,7 @@ const bundle = async (
             hash,
             commonHash,
             bundleName: fileName,
-            isBootstrap: true,
+            componentType: 1,
             timestamp: +new Date(),
           },
           undefined,
@@ -140,7 +140,7 @@ const bundle = async (
     return {
       [fileName]: {
         hash,
-        isBootstrap: true,
+        componentType: 1,
       },
     };
   } finally {
