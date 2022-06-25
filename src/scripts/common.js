@@ -15,6 +15,7 @@ const deffered = require('../utils/deffered');
 const { delDir, createDirIfNotExists } = require('../utils/fsUtils');
 const analysisRegisterComponent = require('../utils/analysisRegisterComponent');
 const bundleBuz = require('./bussines');
+const bundleBootstrap = require('./bootstrap');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathMacthRegExp = require('../utils/genPathMacthRegExp');
 
@@ -47,7 +48,6 @@ function common(config) {
   const bootstrapListRegExp = genPathMacthRegExp(
     bundleSplitConfig.bootstrap.map((i) => path.join(process.cwd(), i))
   );
-  const bootstrapIdSet = new Set();
   const detectFilter = (path) => {
     try {
       // 过滤自带的require polyfills实现不重启app更新模块
@@ -58,9 +58,9 @@ function common(config) {
         // 外部依赖
         return true;
       } else {
-        if (blackListRegExp.test(path)) return false;
-        if (whiteListRegExp.test(path) || bootstrapListRegExp.test(path))
-          return true;
+        if (blackListRegExp.test(path) || bootstrapListRegExp.test(path))
+          return false;
+        if (whiteListRegExp.test(path)) return true;
       }
     } catch {}
     return false;
@@ -86,7 +86,6 @@ function common(config) {
             id,
             hash: genFileHash(path),
           };
-          if (bootstrapListRegExp.test(path)) bootstrapIdSet.add(id);
           return id;
         }
         return null;
@@ -104,10 +103,6 @@ function common(config) {
       bundle.code =
         `var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{},__METRO_GLOBAL_PREFIX__='';process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";\r` +
         bundle.code;
-      const bootstrapCode = Array.from(bootstrapIdSet).map(
-        (id) => `__r(${id});\n`
-      );
-      bundle.code = bundle.code + '\n' + bootstrapCode;
       output.save(
         bundle,
         {
@@ -161,7 +156,9 @@ function common(config) {
     if (isBuz) {
       startId = Object.keys(require(getNewestSourceMap(platform))).length;
     }
-    delDir(codeDirPath);
+    pAll.push(
+      bundleBootstrap(bundleSplitConfig, codeDirPath, platform, startId, config)
+    );
     analysisRegisterComponent(bundleSplitConfig).then((res) => {
       for (let i = 0; i < Array.from(res.keys()).length; i++) {
         const component = Array.from(res.keys())[i];
@@ -175,7 +172,7 @@ function common(config) {
             platform,
             component,
             entryFilePath,
-            startId + i * 100000,
+            startId + (i + 1) * 100000,
             config
           )
         );
