@@ -18,6 +18,7 @@ const bundleBuz = require('./bussines');
 const bundleBootstrap = require('./bootstrap');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathMacthRegExp = require('../utils/genPathMacthRegExp');
+const getMetroOptions = require('../utils/getMetroOptions');
 
 function common(config) {
   const ctx = loadConfig();
@@ -66,7 +67,7 @@ function common(config) {
     return false;
   };
   const bundle = async (platform) => {
-    const config = await loadMetroConfig(ctx);
+    const config = await loadMetroConfig(ctx, getMetroOptions());
     const originGetPolyfills = config.serializer.getPolyfills;
     config.serializer.getPolyfills = function () {
       return [

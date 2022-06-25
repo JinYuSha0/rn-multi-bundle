@@ -13,6 +13,7 @@ const { createDirIfNotExists, delDir } = require('../utils/fsUtils');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathFactory = require('../utils/genPathFactory');
 const genFileHash = require('../utils/genFileHash');
+const getMetroOptions = require('../utils/getMetroOptions');
 
 const ctx = loadConfig();
 const rootPath = ctx.root;
@@ -39,7 +40,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
     createDirIfNotExists(bundleOutputPath),
     fileName
   );
-  const metroConfig = await loadMetroConfig(ctx);
+  const metroConfig = await loadMetroConfig(ctx, getMetroOptions());
   const moduleIdMap = require(getNewestSourceMap(platform));
   const commonHash = Object.keys(moduleIdMap)
     .map((key) => moduleIdMap[key])
