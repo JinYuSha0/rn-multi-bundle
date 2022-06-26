@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const Server = require('metro/src/Server');
 const output = require('metro/src/shared/output/bundle');
 const loadConfig =
@@ -18,9 +19,9 @@ const bundleBuz = require('./bussines');
 const bundleBootstrap = require('./bootstrap');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathMacthRegExp = require('../utils/genPathMacthRegExp');
-const getMetroOptions = require('../utils/getMetroOptions');
 
 function common(config) {
+  const sysPlatform = os.platform();
   const ctx = loadConfig();
   const rootPath = ctx.root;
   const genPath = genPathFactory(rootPath);
@@ -67,7 +68,7 @@ function common(config) {
     return false;
   };
   const bundle = async (platform) => {
-    const config = await loadMetroConfig(ctx, getMetroOptions());
+    const config = await loadMetroConfig(ctx);
     const originGetPolyfills = config.serializer.getPolyfills;
     config.serializer.getPolyfills = function () {
       return [
@@ -151,12 +152,13 @@ function common(config) {
     resolve(true);
   }
 
-  p.then((isBuz) => {
+  p.then(async (isBuz) => {
     const pAll = [];
     let startId = Object.keys(moduleIdMap).length;
     if (isBuz) {
       startId = Object.keys(require(getNewestSourceMap(platform))).length;
     }
+    const components = {};
     pAll.push(
       bundleBootstrap(bundleSplitConfig, codeDirPath, platform, startId, config)
     );
@@ -178,33 +180,29 @@ function common(config) {
           )
         );
       }
-      Promise.all(pAll)
-        .then((childComponents) => {
-          if (!isBuz) {
-            const components = {
-              [outputBundleFileName]: {
-                hash: genFileHash(bundleOutputFilePath),
-                componentType: 0,
-              },
-            };
-            childComponents.forEach((componentHash) => {
-              Object.assign(components, componentHash);
-            });
-            fs.writeFileSync(
-              path.resolve(bundleOutputPath, 'appSetting.json'),
-              JSON.stringify(
-                { components, timestamp: +new Date() },
-                undefined,
-                2
-              )
-            );
-          }
-        })
-        .then(() => {
-          console.log('end');
-          delDir(codeDirPath);
-        });
     });
+    Promise.all(pAll)
+      .then((childComponents) => {
+        if (!isBuz) {
+          const components = {
+            [outputBundleFileName]: {
+              hash: genFileHash(bundleOutputFilePath),
+              componentType: 0,
+            },
+          };
+          childComponents.forEach((componentHash) => {
+            Object.assign(components, componentHash);
+          });
+          fs.writeFileSync(
+            path.resolve(bundleOutputPath, 'appSetting.json'),
+            JSON.stringify({ components, timestamp: +new Date() }, undefined, 2)
+          );
+        }
+      })
+      .then(() => {
+        console.log('end');
+        delDir(codeDirPath);
+      });
   });
 }
 

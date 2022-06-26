@@ -14,7 +14,6 @@ const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathFactory = require('../utils/genPathFactory');
 const genFileHash = require('../utils/genFileHash');
 const genPathImportScript = require('../utils/genPathImportScript');
-const getMetroOptions = require('../utils/getMetroOptions');
 
 const ctx = loadConfig();
 const rootPath = ctx.root;
@@ -49,7 +48,7 @@ const bundle = async (
     createDirIfNotExists(bundleOutputPath),
     fileName
   );
-  const metroConfig = await loadMetroConfig(ctx, getMetroOptions());
+  const metroConfig = await loadMetroConfig(ctx);
   const moduleIdMap = require(getNewestSourceMap(platform));
   const commonHash = Object.keys(moduleIdMap)
     .map((key) => moduleIdMap[key])
