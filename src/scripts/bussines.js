@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const compressing = require('compressing');
 const Server = require('metro/src/Server');
 const output = require('metro/src/shared/output/bundle');
@@ -80,6 +81,13 @@ const bunele = async (platform, component, entryFile, startId, config) => {
   const server = new Server(metroConfig);
   try {
     const bundle = await output.build(server, commonRequestOpts);
+    const hash = crypto.createHash('md5').update(bundle.code).digest('hex');
+    if (config.buz) {
+      bundle.code = bundle.code.replace(
+        /registerAsset\({(.*?)}\)/g,
+        `registerAsset({$1,package:"${component}/${hash}/"})`
+      );
+    }
     output.save(
       bundle,
       {
@@ -98,7 +106,6 @@ const bunele = async (platform, component, entryFile, startId, config) => {
       platform,
       createDirIfNotExists(assetsOutPuthPath)
     );
-    const hash = genFileHash(bundleOutputFilePath);
     if (config.buz) {
       fs.writeFileSync(
         path.join(bundleOutputPath, 'setting.json'),

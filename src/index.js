@@ -25,6 +25,7 @@ function parseDirpath(value, prev) {
 
 program
   .option('-u, --buz', 'Build business bundle')
+  .option('-b, --bootstrap', 'Build bootstrap bundle')
   .option('-p, --platform [platform]', 'android or ios')
   .option(
     '-e, --entry [path]',

@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const Server = require('metro/src/Server');
 const output = require('metro/src/shared/output/bundle');
 const loadConfig =
@@ -21,7 +20,6 @@ const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathMacthRegExp = require('../utils/genPathMacthRegExp');
 
 function common(config) {
-  const sysPlatform = os.platform();
   const ctx = loadConfig();
   const rootPath = ctx.root;
   const genPath = genPathFactory(rootPath);
@@ -146,63 +144,78 @@ function common(config) {
     }
   };
 
-  if (!config.buz) {
+  if (!config.buz && !config.bootstrap) {
     bundle(platform);
   } else {
-    resolve(true);
+    if (config.buz) {
+      resolve('buz');
+    }
+    if (config.bootstrap) {
+      resolve('bootstrap');
+    }
   }
 
-  p.then(async (isBuz) => {
+  p.then((type) => {
     const pAll = [];
     let startId = Object.keys(moduleIdMap).length;
-    if (isBuz) {
+    if (!!type) {
       startId = Object.keys(require(getNewestSourceMap(platform))).length;
     }
-    const components = {};
     pAll.push(
       bundleBootstrap(bundleSplitConfig, codeDirPath, platform, startId, config)
     );
-    analysisRegisterComponent(bundleSplitConfig).then((res) => {
-      for (let i = 0; i < Array.from(res.keys()).length; i++) {
-        const component = Array.from(res.keys())[i];
-        const entryFilePath = path.resolve(
-          createDirIfNotExists(codeDirPath),
-          `${component}.${Math.random().toString(36).split('.')[1]}.js`
-        );
-        fs.writeFileSync(entryFilePath, res.get(component));
-        pAll.push(
-          bundleBuz(
-            platform,
-            component,
-            entryFilePath,
-            startId + (i + 1) * 100000,
-            config
-          )
-        );
-      }
-    });
-    Promise.all(pAll)
-      .then((childComponents) => {
-        if (!isBuz) {
-          const components = {
-            [outputBundleFileName]: {
-              hash: genFileHash(bundleOutputFilePath),
-              componentType: 0,
-            },
-          };
-          childComponents.forEach((componentHash) => {
-            Object.assign(components, componentHash);
-          });
-          fs.writeFileSync(
-            path.resolve(bundleOutputPath, 'appSetting.json'),
-            JSON.stringify({ components, timestamp: +new Date() }, undefined, 2)
+    if (type !== 'bootstrap') {
+      analysisRegisterComponent(bundleSplitConfig).then((res) => {
+        for (let i = 0; i < Array.from(res.keys()).length; i++) {
+          const component = Array.from(res.keys())[i];
+          const entryFilePath = path.resolve(
+            createDirIfNotExists(codeDirPath),
+            `${component}.${Math.random().toString(36).split('.')[1]}.js`
+          );
+          fs.writeFileSync(entryFilePath, res.get(component));
+          pAll.push(
+            bundleBuz(
+              platform,
+              component,
+              entryFilePath,
+              startId + (i + 1) * 100000,
+              config
+            )
           );
         }
-      })
-      .then(() => {
+        Promise.all(pAll)
+          .then((childComponents) => {
+            if (!type) {
+              const components = {
+                [outputBundleFileName]: {
+                  hash: genFileHash(bundleOutputFilePath),
+                  componentType: 0,
+                },
+              };
+              childComponents.forEach((componentHash) => {
+                Object.assign(components, componentHash);
+              });
+              fs.writeFileSync(
+                path.resolve(bundleOutputPath, 'appSetting.json'),
+                JSON.stringify(
+                  { components, timestamp: +new Date() },
+                  undefined,
+                  2
+                )
+              );
+            }
+          })
+          .then(() => {
+            console.log('end');
+            delDir(codeDirPath);
+          });
+      });
+    } else {
+      Promise.all(pAll).then(() => {
         console.log('end');
         delDir(codeDirPath);
       });
+    }
   });
 }
 
