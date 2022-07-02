@@ -20,6 +20,7 @@ const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathMacthRegExp = require('../utils/genPathMacthRegExp');
 
 function common(config) {
+  const configOptions = config;
   const ctx = loadConfig();
   const rootPath = ctx.root;
   const genPath = genPathFactory(rootPath);
@@ -67,6 +68,7 @@ function common(config) {
   };
   const bundle = async (platform) => {
     const config = await loadMetroConfig(ctx);
+    config.resetCache = configOptions.resetCache ?? false;
     const originGetPolyfills = config.serializer.getPolyfills;
     config.serializer.getPolyfills = function () {
       return [
@@ -98,6 +100,7 @@ function common(config) {
         dev: false,
         minify: true,
         platform,
+        minify: configOptions.minify ?? true,
       };
       const bundle = await output.build(server, commonRequestOpts);
       bundle.code =
@@ -161,9 +164,18 @@ function common(config) {
     if (!!type) {
       startId = Object.keys(require(getNewestSourceMap(platform))).length;
     }
-    pAll.push(
-      bundleBootstrap(bundleSplitConfig, codeDirPath, platform, startId, config)
-    );
+    const oneBuzBundle = typeof configOptions.buz === 'string';
+    if (!oneBuzBundle) {
+      pAll.push(
+        bundleBootstrap(
+          bundleSplitConfig,
+          codeDirPath,
+          platform,
+          startId,
+          config
+        )
+      );
+    }
     if (type !== 'bootstrap') {
       analysisRegisterComponent(bundleSplitConfig).then((res) => {
         for (let i = 0; i < Array.from(res.keys()).length; i++) {
@@ -173,15 +185,17 @@ function common(config) {
             `${component}.${Math.random().toString(36).split('.')[1]}.js`
           );
           fs.writeFileSync(entryFilePath, res.get(component));
-          pAll.push(
-            bundleBuz(
-              platform,
-              component,
-              entryFilePath,
-              startId + (i + 1) * 100000,
-              config
-            )
-          );
+          if (!oneBuzBundle || component === configOptions.buz) {
+            pAll.push(
+              bundleBuz(
+                platform,
+                component,
+                entryFilePath,
+                startId + (i + 1) * 100000,
+                config
+              )
+            );
+          }
         }
         Promise.all(pAll)
           .then((childComponents) => {

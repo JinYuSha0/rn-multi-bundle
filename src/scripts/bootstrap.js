@@ -49,6 +49,7 @@ const bundle = async (
     fileName
   );
   const metroConfig = await loadMetroConfig(ctx);
+  metroConfig.resetCache = config.resetCache ?? false;
   const moduleIdMap = require(getNewestSourceMap(platform));
   const commonHash = Object.keys(moduleIdMap)
     .map((key) => moduleIdMap[key])
@@ -87,7 +88,7 @@ const bundle = async (
   const commonRequestOpts = {
     entryFile: entryFilePath,
     dev: false,
-    minify: true,
+    minify: config.minify ?? true,
     platform,
   };
   const server = new Server(metroConfig);

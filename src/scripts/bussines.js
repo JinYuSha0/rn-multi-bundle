@@ -45,6 +45,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
   const commonHash = Object.keys(moduleIdMap)
     .map((key) => moduleIdMap[key])
     .find((o) => o.id === -1).hash;
+  metroConfig.resetCache = config.resetCache ?? false;
   metroConfig.serializer.processModuleFilter = function (module) {
     const { path } = module;
     if (
@@ -75,7 +76,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
   const commonRequestOpts = {
     entryFile,
     dev: false,
-    minify: true,
+    minify: config.minify ?? true,
     platform,
   };
   const server = new Server(metroConfig);

@@ -24,9 +24,11 @@ function parseDirpath(value, prev) {
 }
 
 program
-  .option('-u, --buz', 'Build business bundle')
+  .option('-u, --buz [name]', 'Build business bundle')
   .option('-b, --bootstrap', 'Build bootstrap bundle')
   .option('-p, --platform [platform]', 'android or ios')
+  .option('-r, --resetCache', 'reset cache')
+  .option('-m, --minify [minify]', 'minify')
   .option(
     '-e, --entry [path]',
     'Entry file path',
@@ -58,6 +60,12 @@ const options = program.opts();
 
 if (!options.platform) {
   options.platform = 'android';
+}
+
+if (options.minify === 'false') {
+  options.minify = false;
+} else {
+  options.minify = true;
 }
 
 if (!options.out && !options.buz) {
