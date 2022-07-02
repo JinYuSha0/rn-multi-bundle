@@ -180,12 +180,12 @@ function common(config) {
       analysisRegisterComponent(bundleSplitConfig).then((res) => {
         for (let i = 0; i < Array.from(res.keys()).length; i++) {
           const component = Array.from(res.keys())[i];
-          const entryFilePath = path.resolve(
-            createDirIfNotExists(codeDirPath),
-            `${component}.${Math.random().toString(36).split('.')[1]}.js`
-          );
-          fs.writeFileSync(entryFilePath, res.get(component));
           if (!oneBuzBundle || component === configOptions.buz) {
+            const entryFilePath = path.resolve(
+              createDirIfNotExists(codeDirPath),
+              `${component}.${Math.random().toString(36).split('.')[1]}.js`
+            );
+            fs.writeFileSync(entryFilePath, res.get(component));
             pAll.push(
               bundleBuz(
                 platform,
