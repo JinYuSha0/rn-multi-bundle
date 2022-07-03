@@ -53,7 +53,8 @@ function define(factory, moduleId, dependencyMap) {
       }
     }
 
-    // 允许模块覆盖，由原生把控
+    // @modify
+    // 允许模块覆盖，实现模块及时更新
     // return;
   }
 
@@ -286,7 +287,12 @@ function loadModuleImplementation(moduleId, module) {
   }
 
   if (!module) {
-    throw unknownModuleError(moduleId);
+    // @modify
+    // 一般不会出现moduleId为空的情况
+    // 除非部分库动态require其他未安装的外部库
+    // 但只要不使用这些功能就不会有问题
+    // throw unknownModuleError(moduleId);
+    return;
   }
 
   if (module.hasError) {
