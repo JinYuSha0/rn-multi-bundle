@@ -14,6 +14,7 @@ const { createDirIfNotExists, delDir } = require('../utils/fsUtils');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathFactory = require('../utils/genPathFactory');
 const genFileHash = require('../utils/genFileHash');
+const removeExecuteCore = require('../utils/removeExecuteCore');
 
 const ctx = loadConfig();
 const rootPath = ctx.root;
@@ -81,7 +82,10 @@ const bunele = async (platform, component, entryFile, startId, config) => {
   };
   const server = new Server(metroConfig);
   try {
-    const bundle = await output.build(server, commonRequestOpts);
+    const bundle = removeExecuteCore(
+      moduleIdMap,
+      await output.build(server, commonRequestOpts)
+    );
     const hash = crypto.createHash('md5').update(bundle.code).digest('hex');
     if (config.buz) {
       bundle.code = bundle.code.replace(

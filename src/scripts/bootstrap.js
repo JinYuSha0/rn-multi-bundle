@@ -14,6 +14,7 @@ const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathFactory = require('../utils/genPathFactory');
 const genFileHash = require('../utils/genFileHash');
 const genPathImportScript = require('../utils/genPathImportScript');
+const removeExecuteCore = require('../utils/removeExecuteCore');
 
 const ctx = loadConfig();
 const rootPath = ctx.root;
@@ -93,7 +94,10 @@ const bundle = async (
   };
   const server = new Server(metroConfig);
   try {
-    const bundle = await output.build(server, commonRequestOpts);
+    const bundle = removeExecuteCore(
+      moduleIdMap,
+      await output.build(server, commonRequestOpts)
+    );
     output.save(
       bundle,
       {
