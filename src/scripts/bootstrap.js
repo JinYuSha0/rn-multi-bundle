@@ -126,6 +126,7 @@ const bundle = async (
             hash,
             commonHash,
             bundleName: fileName,
+            componentName: 'Bootstrap',
             componentType: 1,
             timestamp: +new Date(),
           },
