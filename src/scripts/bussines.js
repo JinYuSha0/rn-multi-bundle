@@ -22,6 +22,7 @@ const genPath = genPathFactory(rootPath);
 
 const bunele = async (platform, component, entryFile, startId, config) => {
   const getModuleId = require('../utils/getModuleId')(true, startId);
+  const nodeModulesPath = path.join(rootPath, 'node_modules');
   const bundlePath = config.buz
     ? path.join(config.out, `./${component}`)
     : config.out;
@@ -49,10 +50,12 @@ const bunele = async (platform, component, entryFile, startId, config) => {
   metroConfig.resetCache = config.resetCache ?? false;
   metroConfig.serializer.processModuleFilter = function (module) {
     const { path } = module;
+    const inNodeModules = path.startsWith(nodeModulesPath);
     if (
       path.indexOf('polyfills') >= 0 ||
       path.indexOf('__prelude__') >= 0 ||
-      path.indexOf('source-map') >= 0
+      path.indexOf('source-map') >= 0 ||
+      inNodeModules
     ) {
       return false;
     }
