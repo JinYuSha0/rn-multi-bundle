@@ -15,6 +15,7 @@ const genPathFactory = require('../utils/genPathFactory');
 const genFileHash = require('../utils/genFileHash');
 const genPathImportScript = require('../utils/genPathImportScript');
 const removeExecuteCore = require('../utils/removeExecuteCore');
+const bytecode = require('./bytecode');
 
 const ctx = loadConfig();
 const rootPath = ctx.root;
@@ -98,7 +99,7 @@ const bundle = async (
       moduleIdMap,
       await output.build(server, commonRequestOpts)
     );
-    output.save(
+    await output.save(
       bundle,
       {
         bundleOutput: bundleOutputFilePath,
@@ -106,6 +107,9 @@ const bundle = async (
       },
       console.log
     );
+    if (config.hermes) {
+      await bytecode(bundleOutputFilePath);
+    }
     const outputAssets = await server.getAssets({
       ...Server.DEFAULT_BUNDLE_OPTIONS,
       ...commonRequestOpts,

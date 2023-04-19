@@ -15,6 +15,7 @@ const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathFactory = require('../utils/genPathFactory');
 const genFileHash = require('../utils/genFileHash');
 const removeExecuteCore = require('../utils/removeExecuteCore');
+const bytecode = require('./bytecode');
 
 const ctx = loadConfig();
 const rootPath = ctx.root;
@@ -96,7 +97,7 @@ const bunele = async (platform, component, entryFile, startId, config) => {
         `registerAsset({$1,package:"${component}/${hash}/"})`
       );
     }
-    output.save(
+    await output.save(
       bundle,
       {
         bundleOutput: bundleOutputFilePath,
@@ -104,6 +105,9 @@ const bunele = async (platform, component, entryFile, startId, config) => {
       },
       console.log
     );
+    if (config.hermes) {
+      await bytecode(bundleOutputFilePath);
+    }
     const outputAssets = await server.getAssets({
       ...Server.DEFAULT_BUNDLE_OPTIONS,
       ...commonRequestOpts,

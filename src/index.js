@@ -29,6 +29,7 @@ program
   .option('-p, --platform [platform]', 'android or ios')
   .option('-r, --resetCache', 'reset cache')
   .option('-m, --minify [minify]', 'minify')
+  .option('-h, --hermes', 'Use hermes bytecode')
   .option(
     '-e, --entry [path]',
     'Entry file path',

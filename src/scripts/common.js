@@ -18,6 +18,7 @@ const bundleBuz = require('./bussines');
 const bundleBootstrap = require('./bootstrap');
 const getNewestSourceMap = require('../utils/getNewestSourceMap');
 const genPathMacthRegExp = require('../utils/genPathMacthRegExp');
+const bytecode = require('./bytecode');
 
 function common(config) {
   const configOptions = config;
@@ -106,7 +107,7 @@ function common(config) {
       bundle.code =
         `var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{},__METRO_GLOBAL_PREFIX__='';process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";\r` +
         bundle.code;
-      output.save(
+      await output.save(
         bundle,
         {
           bundleOutput: bundleOutputFilePath,
@@ -114,6 +115,9 @@ function common(config) {
         },
         console.log
       );
+      if (configOptions.hermes) {
+        await bytecode(bundleOutputFilePath);
+      }
       const outputAssets = await server.getAssets({
         ...Server.DEFAULT_BUNDLE_OPTIONS,
         ...commonRequestOpts,
